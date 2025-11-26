@@ -15,7 +15,7 @@ jobs:
 
       - name: Create SSH private key file
         run: |
-          # write secret into a file and secure it
+          # write secret into a file and secure it it
           echo "$SSH_PRIVATE_KEY" > ./private_key
           chmod 600 ./private_key
         env:
@@ -24,7 +24,7 @@ jobs:
       - name: (optional) Show key header for debug (safe)
         if: ${{ always() }}
         run: |
-          echo "-----BEGIN KEY PREVIEW-----"
+          echo "-----BEGIN KEY PREVIEW-----" 
           head -n 3 ./private_key || true
           echo "-----END KEY PREVIEW-----"
 
