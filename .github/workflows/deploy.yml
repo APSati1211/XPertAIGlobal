@@ -1,0 +1,43 @@
+name: Deploy on AWS EC2 Frontend Server
+ 
+on:
+
+  push:
+
+    branches:
+
+      - main
+ 
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+ 
+    steps:
+
+      - name: 🔐 Connect & Pull Latest Code
+
+        uses: appleboy/ssh-action@v1.0.0
+
+        with:
+
+          host: 65.0.71.42
+
+          username: root
+
+          script: |
+
+            curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
+            apt-get install -y nodejs
+
+            npm install -g pnpm pm2
+
+            ls -la
+
+            cd XPertAIGlobal 
+
+            git pull origin main
+
+ 
