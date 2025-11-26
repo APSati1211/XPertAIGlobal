@@ -1,9 +1,12 @@
-// src/api/index.js
-
 import axios from "axios";
 
+// Yahan humne tumhare Backend ka naya IP daal diya hai
+// Agar REACT_APP_API_URL set nahi bhi hai, to ye fallback IP kaam karega
+const BASE_URL = process.env.REACT_APP_API_URL || "http://13.233.91.34:8000/api/";
+
 const API = axios.create({
-    baseURL: "http://13.233.91.34:8000/", 
+    baseURL: BASE_URL, 
+    withCredentials: true, // Chatbot/Session ke liye zaroori hai
 });
 
 // Dynamic content
@@ -22,7 +25,7 @@ export const getBlogs = (categorySlug = '') => {
     return API.get(url);
 };
 
-// NEW: Function to fetch all categories
+// Function to fetch all categories
 export const getCategories = () => API.get("blog-categories/");
 
 // Leads
@@ -43,8 +46,8 @@ export const getResources = () => API.get("resources/");
 export const getServices = () => API.get("services/");
 export const getServiceBySlug = (slug) => API.get(`services/${slug}/`);
 
-// --- CRITICAL FIX 1: New API function for Theme Settings (for useThemeSettings hook) ---
+// --- Theme Settings ---
 export const getThemeSettings = () => API.get("theme-settings/"); 
 
-// --- CRITICAL FIX 2: Rename Chatbot Handler to match new backend function name and path ---
+// --- Chatbot Handler ---
 export const chatFlowHandler = (data) => API.post("chatbot-flow/", data);
