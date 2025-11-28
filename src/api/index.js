@@ -1,15 +1,12 @@
+// src/api/index.js
+
 import axios from "axios";
 
-// Agar .env file me URL nahi hai, to default localhost use karega.
-// Agar tumhe live server (13.233...) use karna hai, to niche URL change kar lena.
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/api/";
-
 const API = axios.create({
-    baseURL: BASE_URL, 
-    withCredentials: true, // Ye Chatbot aur Session maintain karne ke liye zaroori hai
+    baseURL: "http://3.108.252.40:8000/api/", 
 });
 
-// Dynamic content fetch karne ke liye
+// Dynamic content
 export const getPageContent = (page) => {
     if (page === "home") {
         return API.get("home-page-content/");
@@ -17,49 +14,37 @@ export const getPageContent = (page) => {
     return API.get(`sitecontent/?page=${page}`);
 };
 
-// Blogs fetch karne ke liye (category filter ke saath)
 export const getBlogs = (categorySlug = '') => {
     let url = "blogs/";
     if (categorySlug) {
-        url += `?category=${categorySlug}`; 
+        url += `?category=${categorySlug}`; // Add filter parameter
     }
     return API.get(url);
 };
 
-// Categories fetch karne ke liye
+// NEW: Function to fetch all categories
 export const getCategories = () => API.get("blog-categories/");
 
-// Leads submit karne ke liye
+// Leads
 export const submitLead = (data) => API.post("leads/", data);
 
-// Contact form submit karne ke liye
+// Contact form
 export const sendContact = (data) => API.post("contact/", data);
 
-// Careers / Jobs fetch karne ke liye
+// Careers
 export const getJobs = () => API.get("jobs/");
 export const applyForJob = (data) => API.post("apply/", data);
 
-// Resources aur Case Studies fetch karne ke liye
+// Resources & Case Studies
 export const getCaseStudies = () => API.get("case-studies/");
 export const getResources = () => API.get("resources/");
 
-// Services fetch karne ke liye
+// --- Services ---
 export const getServices = () => API.get("services/");
 export const getServiceBySlug = (slug) => API.get(`services/${slug}/`);
 
-// Theme Settings fetch karne ke liye
+// --- CRITICAL FIX 1: New API function for Theme Settings (for useThemeSettings hook) ---
 export const getThemeSettings = () => API.get("theme-settings/"); 
 
-// Chatbot Flow handle karne ke liye
+// --- CRITICAL FIX 2: Rename Chatbot Handler to match new backend function name and path ---
 export const chatFlowHandler = (data) => API.post("chatbot-flow/", data);
-
-export const getStakeholders = () => API.get("stakeholders/");
-
-// --- Home Page ---
-export const getHomeData = () => API.get("homepage-data/");
-
-// --- Resources Page ---
-export const getResourcesPageData = () => API.get("resources-page-data/");
-
-// --- Lead System Page ---
-export const getLeadSystemData = () => API.get("lead-system-data/");
