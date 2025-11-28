@@ -48,3 +48,9 @@ export const getThemeSettings = () => API.get("theme-settings/");
 
 // --- CRITICAL FIX 2: Rename Chatbot Handler to match new backend function name and path ---
 export const chatFlowHandler = (data) => API.post("chatbot-flow/", data);
+
+// Resources Page Data
+export const getResourcesPageData = () => getPageContent("resources");
+
+// Stakeholders
+export const getStakeholders = () => API.get("stakeholders/");

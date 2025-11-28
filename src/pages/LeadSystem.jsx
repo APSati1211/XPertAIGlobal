@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getLeadSystemData } from "../api";
+import { getPageContent } from "../api";
 import * as LucideIcons from "lucide-react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
@@ -10,7 +10,7 @@ export default function LeadSystem() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLeadSystemData()
+    getPageContent("lead-system")()
       .then((res) => {
         setData(res.data);
         setLoading(false);
