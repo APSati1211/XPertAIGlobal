@@ -2,8 +2,11 @@
 
 import axios from "axios";
 
+// src/api/index.js
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/api/";
+
 const API = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/", 
+    baseURL: BASE_URL, 
 });
 
 // Dynamic content

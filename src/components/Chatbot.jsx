@@ -2,19 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Bot, User, Send, MessageSquare, Loader } from 'lucide-react';
-import axios from 'axios'; 
+// 👇 Import fixed API function
+import { chatFlowHandler } from '../api'; 
 import useThemeSettings from '../hooks/useThemeSettings'; 
 
-// --- DUMMY AXIOS INSTANCE (Replace with your actual configured instance) ---
-const api = axios.create({
-    baseURL: '/api', 
-});
-// --------------------------------------------------------------------------
-
 const Chatbot = () => {
-    // Get configurable welcome message from ThemeSetting
     const { settings, loading: settingsLoading } = useThemeSettings(); 
-    // Default fallback if settings are still loading or not found
     const welcomeMessage = settings?.chatbot_welcome_message || "Welcome to XpertAI. To help you better, I need a few details. Shall we start?";
 
     const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +15,6 @@ const Chatbot = () => {
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     
-    // currentField holds the Lead model field the bot expects an answer for ('name', 'email', etc.)
     const [currentField, setCurrentField] = useState(null); 
     const messagesEndRef = useRef(null);
 
@@ -34,8 +26,8 @@ const Chatbot = () => {
     const startFlow = async (isRestart = false) => {
         setIsLoading(true);
         try {
-            // Send null to signal the start of a new flow, or restart
-            const response = await api.post('/chatbot-flow/', {
+            // 👇 Uses proper API with credentials
+            const response = await chatFlowHandler({
                 current_field: null, 
                 answer: null
             });
@@ -68,32 +60,35 @@ const Chatbot = () => {
         setIsLoading(true);
 
         try {
-            // 2. Send answer to the flow handler
-            const response = await api.post('/chatbot-flow/', {
-                current_field: currentField, // The field we just answered
+            // 👇 Uses proper API with credentials
+            const response = await chatFlowHandler({
+                current_field: currentField, 
                 answer: answer
             });
             const data = response.data;
             
             // 3. Update state based on response
-            setMessages(prev => [...prev, { sender: 'bot', text: data.next_question }]);
-            setCurrentField(data.next_field); 
-
-            if (data.is_complete) {
-                // Lead captured successfully (Task 3)
-                console.log("Lead captured:", data.action);
-                setCurrentField(null); // Stop conversation
-            }
-
             if (data.error) {
-                 // Handle errors (e.g., system error and restart)
-                setMessages(prev => [...prev, { sender: 'bot', text: data.error }]);
+                // Validation error (e.g., empty field)
+                setMessages(prev => [...prev, { sender: 'bot', text: data.error, isError: true }]);
+                // Don't change field, user needs to try again
+                // But we show the question again if needed
+                if (data.next_question && data.next_question !== messages[messages.length-1]?.text) {
+                     setMessages(prev => [...prev, { sender: 'bot', text: data.next_question }]);
+                }
+            } else {
+                // Success path
+                setMessages(prev => [...prev, { sender: 'bot', text: data.next_question }]);
                 setCurrentField(data.next_field); 
+
+                if (data.is_complete) {
+                    console.log("Lead captured:", data.action);
+                    setCurrentField(null); // Stop conversation
+                }
             }
 
         } catch (error) {
             console.error("Error handling flow step:", error);
-            // Fallback for network issues or unhandled server errors
             setMessages(prev => [...prev, { sender: 'bot', text: 'A network error occurred. Please try sending your message again.' }]);
             
         } finally {
@@ -127,7 +122,6 @@ const Chatbot = () => {
 
     return (
         <>
-            {/* Chat button */}
             <button
                 className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition z-50"
                 onClick={() => setIsOpen(!isOpen)}
@@ -136,7 +130,6 @@ const Chatbot = () => {
                 <MessageSquare size={24} />
             </button>
 
-            {/* Chat Window */}
             {isOpen && (
                 <div className="fixed bottom-20 right-6 w-80 h-96 bg-white border border-gray-300 rounded-lg shadow-2xl flex flex-col z-50">
                     
@@ -156,7 +149,7 @@ const Chatbot = () => {
                                 <div className={`max-w-xs p-2 rounded-lg text-sm shadow-md ${
                                     msg.sender === 'user' 
                                     ? 'bg-blue-500 text-white' 
-                                    : 'bg-gray-100 text-gray-800 border'
+                                    : msg.isError ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-gray-100 text-gray-800 border'
                                 }`}>
                                     {msg.sender === 'bot' && <Bot size={14} className="inline mr-1" />}
                                     {msg.sender === 'user' && <User size={14} className="inline mr-1" />}
